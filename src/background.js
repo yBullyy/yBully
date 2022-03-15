@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, child, get } from "firebase/database";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { GoogleAuthProvider, signInWithPopup, getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import * as env from './env';
 
 const firebaseConfig = {
@@ -13,5 +13,22 @@ const firebaseConfig = {
   appId: env.FIREBASE_APP_ID
 };
 const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export default getFirestore(app);
+
+// const googleAuthProvider = new GoogleAuthProvider();
+
+// chrome.runtime.onMessage.addListener((msg, sender, response) => {
+//   if (msg.command === 'login') {
+//     console.log("Login Initiated");
+//     createUserWithEmailAndPassword(auth, 'test@aa.com', 'password').then((result) => {
+//       let user = result.user;
+//       response({ type: "auth", status: "success", message: user });
+//     }).catch((error) => {
+//       let errorMessage = error.message;
+//       response({ type: "auth", status: "error", message: errorMessage });
+//     });
+//   }
+// })
 
 console.log('background script here...')
