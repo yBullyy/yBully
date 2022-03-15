@@ -3,6 +3,9 @@
 	"name": "yBully",
 	"version": "1.0",
 	"description": "yBully",
+	"permissions": [
+		"storage"
+	],
 	"icons": {
 		"16": "/images/icon16.png",
 		"32": "/images/icon32.png",
@@ -25,7 +28,14 @@
 		{
 			"matches":["https://*.twitter.com/*"],
 			"run_at":"document_end",
-			"js":["content/script.js"]
+			"js":["content/script.js"],
+			"css": ["css/style.css"]
+		}
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["content/index.js"],
+			"matches":["https://*.twitter.com/*"]
 		}
 	]
 }
