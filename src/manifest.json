@@ -3,6 +3,9 @@
 	"name": "yBully",
 	"version": "1.0",
 	"description": "yBully",
+	"permissions": [
+		"storage"
+	],
 	"icons": {
 		"16": "/images/icon16.png",
 		"32": "/images/icon32.png",
@@ -28,4 +31,5 @@
 			"js":["content/index.js"]
 		}
 	]
+
 }
