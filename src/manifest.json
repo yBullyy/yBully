@@ -28,7 +28,7 @@
 		{
 			"matches":["https://*.twitter.com/*"],
 			"run_at":"document_end",
-			"js":["content/index.js"],
+			"js":["content/script.js"],
 			"css": ["css/style.css"]
 		}
 	],
