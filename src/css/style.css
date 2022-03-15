@@ -1,0 +1,26 @@
+.blur {
+    -webkit-filter: blur(10px);
+    -moz-filter: blur(10px);
+    -o-filter: blur(10px);
+    -ms-filter: blur(10px);
+    filter: blur(10px);
+    background-color: transparent !important;
+}  
+
+.hidden {
+    display: none;
+  }
+  
+  .revealTweet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-color: #1da1f1 !important;
+    color: #1da1f1 !important;
+  }
+  
+  .revealTweet:hover {
+    background: rgba(29, 161, 242, 0.1) !important;
+  }
+  

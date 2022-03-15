@@ -28,8 +28,14 @@
 		{
 			"matches":["https://*.twitter.com/*"],
 			"run_at":"document_end",
-			"js":["content/index.js"]
+			"js":["content/index.js"],
+			"css": ["css/style.css"]
+		}
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["content/index.js"],
+			"matches":["https://*.twitter.com/*"]
 		}
 	]
-
 }
