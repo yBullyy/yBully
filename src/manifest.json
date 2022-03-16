@@ -34,7 +34,7 @@
 	],
 	"web_accessible_resources": [
 		{
-			"resources": ["content/index.js"],
+			"resources": ["content/script.js"],
 			"matches":["https://*.twitter.com/*"]
 		}
 	]

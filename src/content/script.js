@@ -1,87 +1,100 @@
-const config = {childList:true};
+const config = { childList: true };
 
 const bodyNode = document.querySelector('body');
 const set = new Set();
 const ws = new WebSocket('ws://127.0.0.1:8000/ws')
 const map = {};
 
+
+const revealTweet = (e) => {
+    e.target.classList.add("hidden"); // remove the button
+    e.target.previousSibling.classList.remove("blur"); // remove blur effect
+};
+
+const addBlur = (parent, revealButton) => {
+    parent.classList.add("blur");
+    parent.parentElement.appendChild(revealButton);
+}
+
 const extractText = (node) => {
-	try{
+	try {
 		const spanTags = node.getElementsByTagName('article')[0].children[0].children[0].children[0].children[1].children[1].children[1].children[0].getElementsByTagName('span');
-		// console.log(spanTags);
 		let text = "";
-		for(let i =0;i<spanTags.length;i++){
+		for (let i = 0; i < spanTags.length; i++) {
 			text += spanTags[i].innerText;
 		}
-		// console.log(text);
 		map[text] = node;
 		ws.send(text);
-	}catch(e){
-		console.log("failed");
+	} catch (e) {
+		console.log("Failed to extract text");
 	}
 }
 
 
 ws.onmessage = (event) => {
 	const data = JSON.parse(event.data);
-	const divTag = document.createElement('div');
-	divTag.innerText = `Confidence - ${data.confidence}`;
-	divTag.style.padding = '20px';
-	map[data.text].children[0].appendChild(divTag);
-	// console.log(typeof data.confidence);
-	if(data.confidence > 0.5){
-		map[data.text].style.backgroundColor = 'red';
+	// const divTag = document.createElement('div');
+	// divTag.innerText = `Confidence - ${data.confidence}`;
+	// divTag.style.padding = '20px';
+	// map[data.text].children[0].appendChild(divTag);
+	if (data.confidence > 0) {
+		let revealButton = document.createElement('button');
+		revealButton.addEventListener('click', (e) => revealTweet(e));
+		revealButton.innerText = `Reveal Tweet`;
+		revealButton.classList.add("btn", "btn-primary", "revealTweet");
+		revealButton.setAttribute("type", "button");
+
+		let blurParent = map[data.text].children[0].children[0];
+		addBlur(blurParent, revealButton);
+		// map[data.text].style.backgroundColor = 'red';
 	}
 }
 
+
+
 const extractTweets = (obs) => {
 	const baseNode = document.querySelectorAll('.css-1dbjc4n[aria-label^="Timeline"]');
-	// console.log(baseNode);
-	if(baseNode.length > 0){
-			found = 1;
-			setTimeout(() => {
-				const targetNode = baseNode[0].children[0];
-				// console.log(targetNode);
-				const childrenNodes = targetNode.children;
-				// console.log(childrenNodes.length);
-				for(let i=0;i<childrenNodes.length;i++){
-					// console.log(childrenNodes[i]);
-					extractText(childrenNodes[i]);
-				}
-				const callback = function(mutationsList, observer) {
-				    for(const mutation of mutationsList) {
+	if (baseNode.length > 0) {
+		found = 1;
+		setTimeout(() => {
+			const targetNode = baseNode[0].children[0];
+			const childrenNodes = targetNode.children;
+			for (let i = 0; i < childrenNodes.length; i++) {
+				extractText(childrenNodes[i]);
+			}
+			const callback = function (mutationsList, observer) {
+				for (const mutation of mutationsList) {
 					if (mutation.type === 'childList') {
 						// Fix sending requests to api
-						for(let i=0;i<mutation.addedNodes.length;i++){
-							if(!set.has(mutation.addedNodes[i])){
+						for (let i = 0; i < mutation.addedNodes.length; i++) {
+							if (!set.has(mutation.addedNodes[i])) {
 								extractText(mutation.addedNodes[i]);
 								set.add(mutation.addedNodes[i]);
 							}
 						}
 					}
-				    }
-				};
+				}
+			};
 
-				const observer = new MutationObserver(callback);
+			const observer = new MutationObserver(callback);
 
-				// Start observing the target node for configured mutations
-				observer.observe(targetNode, config);
-			},1000);
-			// obs.disconnect();
+			// Start observing the target node for configured mutations
+			observer.observe(targetNode, config);
+		}, 1000);
+		// obs.disconnect();
 	};
 };
 
 let oldHref = "";
 let found = 0;
 
-const targetObserver = new MutationObserver((mutationsList,obs) => {
+const targetObserver = new MutationObserver((mutationsList, obs) => {
 	mutationsList.forEach((_) => {
-		// console.log(oldHref,document.location.href);
-		if(oldHref != document.location.href){
+		if (oldHref != document.location.href) {
 			oldHref = document.location.href;
 			found = 0;
 			extractTweets();
-		}else if(!found){
+		} else if (!found) {
 			extractTweets();
 		}
 	})
@@ -89,6 +102,6 @@ const targetObserver = new MutationObserver((mutationsList,obs) => {
 });
 
 
-targetObserver.observe(bodyNode,{childList:true,subtree:true});
+targetObserver.observe(bodyNode, { childList: true, subtree: true });
 
 
