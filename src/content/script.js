@@ -56,7 +56,6 @@ const extractTweets = (obs) => {
 	const baseNode = document.querySelectorAll('.css-1dbjc4n[aria-label^="Timeline"]');
 	if (baseNode.length > 0) {
 		found = 1;
-		setTimeout(() => {
 			const targetNode = baseNode[0].children[0];
 			const childrenNodes = targetNode.children;
 			for (let i = 0; i < childrenNodes.length; i++) {
@@ -80,7 +79,6 @@ const extractTweets = (obs) => {
 
 			// Start observing the target node for configured mutations
 			observer.observe(targetNode, config);
-		}, 1000);
 		// obs.disconnect();
 	};
 };
@@ -93,9 +91,13 @@ const targetObserver = new MutationObserver((mutationsList, obs) => {
 		if (oldHref != document.location.href) {
 			oldHref = document.location.href;
 			found = 0;
-			extractTweets();
+			setTimeout(() => {
+				extractTweets();
+			}, 1000);
 		} else if (!found) {
-			extractTweets();
+			setTimeout(() => {
+				extractTweets();
+			}, 1000);
 		}
 	})
 	// extractTweets(obs);

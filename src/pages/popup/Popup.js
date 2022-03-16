@@ -87,6 +87,9 @@ const Popup = () => {
         // </div>
         <div className="login-wrap">
             <div className="login-html">
+                <div className='login-div-title' >
+                    <h1>Welcome to yBully</h1>
+                </div>
                 <input id="tab-1" type="radio" name="tab" className="sign-in" checked onChange={() => { }} />
                 <label htmlFor="tab-1" className="tab" style={{ cursor: "pointer" }}>Sign In</label>
 
