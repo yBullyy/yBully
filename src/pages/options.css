@@ -1,0 +1,28 @@
+body{
+    min-height:550px;
+    background-color: #f5f5f5;
+}
+
+.options-container{
+    padding: 50px;
+}
+
+.action-container{
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 25px;
+}
+
+.s-title{
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.btn-group-vertical{
+    margin-top: 20px;
+    font-weight: 100;
+}
+
+.btn-group-vertical label{
+    font-style: italic;
+}

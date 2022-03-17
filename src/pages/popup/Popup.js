@@ -5,6 +5,7 @@ import { auth } from '../../background';
 import browser from 'webextension-polyfill';
 import { saveUserToFirestore } from '../helpers/firebase';
 import Home from '../home/Home';
+import Options from '../options/Options';
 
 const Popup = () => {
     const [email, setEmail] = useState('');
@@ -111,7 +112,7 @@ const Popup = () => {
                         </div>
                         <div className="hr"></div>
                         <div className="foot-lnk">
-                            <a href="#forgot">Forgot Password?</a>
+                            <a onClick={() => goTo(Options)} href="#forgot">Forgot Password?</a>
                         </div>
                     </div>
                     <div className="sign-up-htm">
