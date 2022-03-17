@@ -1,10 +1,18 @@
 const config = { childList: true };
 
+
+
+let isExtensionOn = true;
 const bodyNode = document.querySelector('body');
 const allTweets = new Set();
 const ws = new WebSocket('ws://127.0.0.1:8000/ws')
 const map = {};
 
+
+// Get current setting of user
+chrome.storage.local.get(['isOn'], (key) => {
+	isExtensionOn = key.isOn;
+});
 
 const revealTweet = (e) => {
     e.target.classList.add("hidden"); // remove the button
@@ -37,7 +45,7 @@ ws.onmessage = (event) => {
 	// divTag.innerText = `Confidence - ${data.confidence}`;
 	// divTag.style.padding = '20px';
 	// map[data.text].children[0].appendChild(divTag);
-	if (data.confidence > 0) {
+	if (data.confidence > 0 && isExtensionOn) {
 		let revealButton = document.createElement('button');
 		revealButton.addEventListener('click', (e) => revealTweet(e));
 		revealButton.innerText = `Reveal Tweet`;
@@ -49,6 +57,15 @@ ws.onmessage = (event) => {
 		// map[data.text].style.backgroundColor = 'red';
 	}
 }
+
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+	  if(key === 'isOn'){ // Whenever isOn key is changed reload the page
+		  location.reload();
+	  }
+  }
+});
+
 
 
 
