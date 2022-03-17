@@ -31,3 +31,14 @@
   color: #fff;
   background-color: #007bff;
 }
+
+
+.s-label {
+  padding: 6px;
+  color: #fff;
+  background-color: red;
+  border-radius: 6px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 10px;
+}

@@ -6,15 +6,52 @@ const ws = new WebSocket('ws://127.0.0.1:8000/ws')
 const map = {};
 
 
+
 const revealTweet = (e) => {
     e.target.classList.add("hidden"); // remove the button
     e.target.previousSibling.classList.remove("blur"); // remove blur effect
 };
 
-const addBlur = (parent, revealButton) => {
-    parent.classList.add("blur");
+const addBlur = (node) => {
+	let parent = node.children[0].children[0];
+	let revealButton = document.createElement('button');
+	revealButton.addEventListener('click', (e) => revealTweet(e));
+	revealButton.innerText = `Reveal Tweet`;
+	revealButton.classList.add("btn", "btn-primary", "revealTweet");
+	revealButton.setAttribute("type", "button");
+    
+	parent.classList.add("blur");
     parent.parentElement.appendChild(revealButton);
 }
+
+const addLabel = (node) => {
+	let topDiv = node.getElementsByTagName('article')[0].children[0].children[0].children[0].children[0].children[0];
+	// add div to children to topDiv at the end
+	let divTag = document.createElement('div');
+	divTag.innerText = `Bully`;
+	divTag.className = 's-label';
+	topDiv.appendChild(divTag);
+}
+
+let selectedAction = addBlur;
+
+chrome.storage.sync.get(['action'], function (result) {
+	switch (result.action) {
+		case 'blur':
+			selectedAction = addBlur;
+			break;
+		case 'label':
+			selectedAction = addLabel;
+			break;
+		case 'remove':
+			selectedAction = addBlur;
+			break;
+		default:
+			selectedAction = addBlur;
+			break;
+	}
+});
+
 
 const extractText = (node) => {
 	try {
@@ -33,20 +70,8 @@ const extractText = (node) => {
 
 ws.onmessage = (event) => {
 	const data = JSON.parse(event.data);
-	// const divTag = document.createElement('div');
-	// divTag.innerText = `Confidence - ${data.confidence}`;
-	// divTag.style.padding = '20px';
-	// map[data.text].children[0].appendChild(divTag);
 	if (data.confidence > 0) {
-		let revealButton = document.createElement('button');
-		revealButton.addEventListener('click', (e) => revealTweet(e));
-		revealButton.innerText = `Reveal Tweet`;
-		revealButton.classList.add("btn", "btn-primary", "revealTweet");
-		revealButton.setAttribute("type", "button");
-
-		let blurParent = map[data.text].children[0].children[0];
-		addBlur(blurParent, revealButton);
-		// map[data.text].style.backgroundColor = 'red';
+		selectedAction(map[data.text]);
 	}
 }
 
