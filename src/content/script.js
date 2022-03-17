@@ -78,7 +78,7 @@ const extractText = (node) => {
 
 ws.onmessage = (event) => {
 	const data = JSON.parse(event.data);
-	if (data.confidence > 0) {
+	if (data.confidence > 0 && isExtensionOn) {
 		selectedAction(map[data.text]);
 	}
 }
