@@ -1,7 +1,7 @@
 const config = { childList: true };
 
 const bodyNode = document.querySelector('body');
-const set = new Set();
+const allTweets = new Set();
 const ws = new WebSocket('ws://127.0.0.1:8000/ws')
 const map = {};
 
@@ -54,8 +54,8 @@ ws.onmessage = (event) => {
 
 const extractTweets = (obs) => {
 	const baseNode = document.querySelectorAll('.css-1dbjc4n[aria-label^="Timeline"]');
-	if (baseNode.length > 0) {
-		found = 1;
+	if (baseNode.length > 0 && !found) {
+		found = true;
 			const targetNode = baseNode[0].children[0];
 			const childrenNodes = targetNode.children;
 			for (let i = 0; i < childrenNodes.length; i++) {
@@ -66,9 +66,9 @@ const extractTweets = (obs) => {
 					if (mutation.type === 'childList') {
 						// Fix sending requests to api
 						for (let i = 0; i < mutation.addedNodes.length; i++) {
-							if (!set.has(mutation.addedNodes[i])) {
+							if (!allTweets.has(mutation.addedNodes[i])) {
 								extractText(mutation.addedNodes[i]);
-								set.add(mutation.addedNodes[i]);
+								allTweets.add(mutation.addedNodes[i]);
 							}
 						}
 					}
@@ -79,18 +79,20 @@ const extractTweets = (obs) => {
 
 			// Start observing the target node for configured mutations
 			observer.observe(targetNode, config);
+		// setTimeout(()=> {
+		// },1000)
 		// obs.disconnect();
 	};
 };
 
 let oldHref = "";
-let found = 0;
+let found = false;
 
 const targetObserver = new MutationObserver((mutationsList, obs) => {
 	mutationsList.forEach((_) => {
 		if (oldHref != document.location.href) {
 			oldHref = document.location.href;
-			found = 0;
+			found = false;
 			setTimeout(() => {
 				extractTweets();
 			}, 1000);
