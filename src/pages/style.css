@@ -3,7 +3,7 @@ body{
 	color:#6a6f8c;
 	background:#c8c8c8;
 	font:600 16px/18px 'Open Sans',sans-serif;
-	width: 500px;
+	width: 420px;
 }
 *,:after,:before{box-sizing:border-box}
 .clearfix:after,.clearfix:before{content:'';display:table}
@@ -220,8 +220,8 @@ input[type=checkbox] {
 .check-trail {
   display: flex;
   align-items: center;
-  width: 9em;
-  height: 5em;
+  width: 50px;
+  height: 20px;
   background: #2c3e50;
   border-radius: 2.5em;
   transition: all 0.5s ease;
@@ -230,11 +230,11 @@ input[type=checkbox] {
 
 .check-handler {
   display: flex;
-  margin-left: 0.5em;
+  /* margin-left: 0.5em; */
   justify-content: center;
   align-items: center;
-  width: 4em;
-  height: 4em;
+  width: 30px;
+  height: 30px;
   background: #34495e;
   border-radius: 50%;
   transition: all 0.5s ease;
@@ -243,7 +243,7 @@ input[type=checkbox] {
 .check-handler:before {
   content: "×";
   color: white;
-  font-size: 2em;
+  font-size: 16px;
   font-weight: bold;
 }
 
@@ -251,7 +251,7 @@ input[type=checkbox]:checked + .check-trail {
   background: #16a085;
 }
 input[type=checkbox]:checked + .check-trail .check-handler {
-  margin-left: 50%;
+  margin-left: 45%;
   background: #1abc9c;
 }
 input[type=checkbox]:checked + .check-trail .check-handler::before {

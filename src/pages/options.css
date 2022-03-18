@@ -1,5 +1,5 @@
 body{
-    min-height:550px;
+    min-height:350px;
     background-color: #f5f5f5;
 }
 
@@ -25,4 +25,15 @@ body{
 
 .btn-group-vertical label{
     font-style: italic;
+}
+
+.options-header{
+    display: flex;
+}
+
+.options-header img{
+    margin-right: 10px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
 }
