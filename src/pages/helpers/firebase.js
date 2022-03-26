@@ -1,5 +1,5 @@
-import { collection, setDoc, doc, updateDoc } from 'firebase/firestore';
-import db from '../../background';
+import { setDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
+import {db} from '../../background';
 
 // =======================================================================
 // User Specific Functions
@@ -37,7 +37,7 @@ export const updateUserStats = async (
     totalApprovedTweets = 0, 
     trustScore = 0) => {
         try {
-            const user = await doc(db, 'users', userId).get();
+            const user = await getDoc(doc(db, 'users', userId));
             const previousTotalScannedTweets = user.data().totalScannedTweets;
             const previousTotalBullyTweets = user.data().totalBullyTweets;
             const previousTotalReportedTweets = user.data().totalReportedTweets;
@@ -72,14 +72,14 @@ export const updateUserStats = async (
 export const updateDailyScannedTweets = async (date, bullyCount, noBullyCount) => {
     try {
         const docRef = doc(db, 'dailyScans', date);
-        const docSnapshot = await docRef.get();
-        if (docSnapshot.exists) {
+        const docSnapshot = await getDoc(docRef);
+        if (docSnapshot.exists()) {
             const data = docSnapshot.data();
             const newBullyCount = data.bullyCount + bullyCount;
             const newNoBullyCount = data.noBullyCount + noBullyCount;
-            await setDoc(docRef, { bullyCount: newBullyCount, noBullyCount: newNoBullyCount });
+            await updateDoc(docRef, { bullyCount: newBullyCount, noBullyCount: newNoBullyCount });
         } else {
-            await setDoc(docRef, { bullyCount, noBullyCount });
+            await setDoc(docRef, { bullyCount, noBullyCount, date });
         }
         return true;
     } catch (error) {
@@ -91,13 +91,13 @@ export const updateDailyScannedTweets = async (date, bullyCount, noBullyCount) =
 export const updateDailyReports = async (date, reportCount) => {
     try {
         const docRef = doc(db, 'dailyReports', date);
-        const docSnapshot = await docRef.get();
-        if (docSnapshot.exists) {
+        const docSnapshot = getDoc(docRef);
+        if (docSnapshot.exists()) {
             const data = docSnapshot.data();
             const newReportCount = data.reportCount + reportCount;
-            await setDoc(docRef, { reportCount: newReportCount });
+            await updateDoc(docRef, { reportCount: newReportCount });
         } else {
-            await setDoc(docRef, { reportCount });
+            await setDoc(docRef, { reportCount, date });
         }
         return true;
     } catch (error) {
@@ -125,3 +125,37 @@ export const addReportedTweet = async (tweetId, userId, text, correctLabel) => {
     }
 
 }
+
+export const updateGeneralStats = async (bullyCount = 0, noBullyCount = 0, reportCount = 0, userCount = 0) => {
+    try {
+        const total_bully_predictions_ref = doc(db, 'stats', 'total_bully_predictions');
+        const total_predictions_ref = doc(db, 'stats', 'total_predictions');
+        const total_reports_ref = doc(db, 'stats', 'total_reports');
+        const total_users_ref = doc(db, 'stats', 'total_users');
+        
+        const total_bully_predictions = await getDoc(total_bully_predictions_ref);
+        const total_predictions = await getDoc(total_predictions_ref);
+        const total_reports = await getDoc(total_reports_ref);
+        const total_users = await getDoc(total_users_ref);
+
+        const newTotalBullyPredictions = total_bully_predictions.data()['count'] + bullyCount;
+        const newTotalPredictions = total_predictions.data()['count'] + bullyCount + noBullyCount;
+        const newTotalReports = total_reports.data()['count'] + reportCount;
+        const newTotalUsers = total_users.data()['count'] + userCount;
+
+        await updateDoc(total_bully_predictions_ref, { count: newTotalBullyPredictions });
+        await updateDoc(total_predictions_ref, { count: newTotalPredictions });
+        await updateDoc(total_reports_ref, { count: newTotalReports });
+        await updateDoc(total_users_ref, { count: newTotalUsers });
+
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;    
+    }
+}
+
+
+// daily scans
+// stats
+// users

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { goTo } from '../../../node_modules/react-chrome-extension-router/dist/index';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../background';
-import browser from 'webextension-polyfill';
 import { saveUserToFirestore } from '../helpers/firebase';
 import Home from '../home/Home';
 import Options from '../options/Options';
@@ -12,9 +11,9 @@ const Popup = () => {
     const [password, setPassword] = useState('');
 
     useEffect(async () => {
-        const { user } = await browser.storage.local.get(['email', 'user']);
+        const { user } = await chrome.storage.local.get(['email', 'user']);
         if (user && user.uid) {
-            goTo(Home);
+            goTo(Home, { user });
         }
     }, []);
 
@@ -60,32 +59,13 @@ const Popup = () => {
                 else
                     alert('User creation failed');
             }
-            await browser.storage.local.set({ email: user.email, user: user });
-            goTo(Home);
+            await chrome.storage.local.set({ email: user.email, user: user, isOn: true, action: 'blur' });
+            goTo(Home, { user });
         }
     }
 
 
     return (
-        // <div>
-        //     <h1>Popup Page</h1>
-        //     <input name="Email" onChange={(value) => setEmail(value.target.value)} value={email} />
-        //     <input name="Password" onChange={(value) => setPassword(value.target.value)} value={password} />
-
-        //     <button onClick={onClickHandler}>Sign In</button>
-
-        //     <button onClick={() => goTo(Options)}>Go to Options</button>
-        //     {/* <button onClick={() => {
-        //         console.log("Clicked");
-        //         chrome.runtime.sendMessage({command: "login"}, (response) => {
-        //             console.log(response);
-        //             if(response.status == "success"){
-        //                 console.log("Logged In");
-        //                 console.log(response);
-        //             }
-        //         });
-        //     }}>Login</button> */}
-        // </div>
         <div className="login-wrap">
             <div className="login-html">
                 <div className='login-div-title' >

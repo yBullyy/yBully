@@ -1,7 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from "firebase/firestore";
-import { GoogleAuthProvider, signInWithPopup, getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import * as env from './env';
+import { saveUserToFirestore, updateDailyScannedTweets, updateGeneralStats, updateUserStats } from './pages/helpers/firebase';
 
 const firebaseConfig = {
   apiKey: env.FIREBASE_API_KEY,
@@ -14,21 +15,79 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export default getFirestore(app);
+export const db = getFirestore(app);
 
-// const googleAuthProvider = new GoogleAuthProvider();
 
-// chrome.runtime.onMessage.addListener((msg, sender, response) => {
-//   if (msg.command === 'login') {
-//     console.log("Login Initiated");
-//     createUserWithEmailAndPassword(auth, 'test@aa.com', 'password').then((result) => {
-//       let user = result.user;
-//       response({ type: "auth", status: "success", message: user });
-//     }).catch((error) => {
-//       let errorMessage = error.message;
-//       response({ type: "auth", status: "error", message: errorMessage });
-//     });
-//   }
-// })
+let bully = new Set();
+let noBully = new Set();
+let twitterTabIds = [];
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  switch (request.type) {
+    case 'saveUserToFirestore':
+      console.log('saveUserToFirestore');
+      saveUserToFirestore(request.user)
+        .then(() => {
+          sendResponse({ success: true });
+        })
+        .catch((err) => {
+          console.log(err);
+          sendResponse({ success: false });
+        });
+      break;
+    case 'ScanTweets':
+      console.log('ScanTweets => switch case');
+      let tabId = sender.tab.id;
+      if (!twitterTabIds.includes(tabId)) {
+        twitterTabIds.push(tabId);
+      }
+      if (request.isBully) {
+        bully.add(request.tweet);
+      } else {
+        noBully.add(request.tweet);
+      }
+      sendResponse({ success: true });
+      break;
+    default:
+      break;
+  }
+});
+
+chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+  console.log('tabId', tabId);
+  console.log(twitterTabIds);
+
+  if (twitterTabIds.includes(tabId)) {
+    console.log('twitter tab is closed');
+    twitterTabIds = twitterTabIds.filter(id => id !== tabId);
+    console.log(twitterTabIds);
+
+    let bullyCount = bully.size;
+    let noBullyCount = noBully.size;
+    let totalScannedTweets = bullyCount + noBullyCount;
+
+    let { user } = await chrome.storage.local.get(['user']);
+    let currUserId = user.uid;
+    console.log(currUserId);
+    
+    let date = new Date();
+    let dateString = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+
+    console.log('bullyCount', bullyCount);
+    console.log('noBullyCount', noBullyCount);
+
+    if(bullyCount > 0 || noBullyCount > 0){
+      bully.clear();
+      noBully.clear();
+      
+      console.log('updating stats...');
+      await updateUserStats(currUserId, totalScannedTweets, bullyCount, 0, 0, 0);
+      await updateDailyScannedTweets(dateString, bullyCount, noBullyCount);
+      await updateGeneralStats(bullyCount, noBullyCount, 0, 0);
+      console.log('updated stats');
+    }
+  }
+
+});
 
 console.log('background script here...')
