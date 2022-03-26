@@ -10,7 +10,7 @@ ws.onmessage = (event) => {
   if (data.confidence < 0.5) {
     tweetBtn.click();
   } else {
-    alert("Bully Tweet");
+    alert("You cannot post this tweet. It is likely a bully tweet. Please don't bully.");
   }
 }
 

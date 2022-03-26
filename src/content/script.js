@@ -7,6 +7,7 @@ const bodyNode = document.querySelector('body');
 const allTweets = new Set();
 const ws = new WebSocket('ws://127.0.0.1:8000/ws')
 const map = new Map();
+const BULLY_THRESHOLD = 0.5;
 
 
 
@@ -91,7 +92,7 @@ const extractText = (node) => {
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
   // console.log(data.text, map.get(data.text));
-  let isBully = data.confidence > 0;
+  let isBully = data.confidence > BULLY_THRESHOLD;
   if(isExtensionOn){
     chrome.runtime.sendMessage({ type: "ScanTweets" , tweet: data.text, isBully: isBully }, (resp) => {
       console.log("ScanTweets", resp);
