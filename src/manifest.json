@@ -1,41 +1,51 @@
 {
-	"manifest_version": 3,
-	"name": "yBully",
-	"version": "1.0",
-	"description": "yBully",
-	"permissions": [
-		"storage"
-	],
-	"icons": {
-		"16": "/images/icon16.png",
-		"32": "/images/icon32.png",
-		"48": "/images/icon48.png",
-		"128": "/images/icon128.png"
-	},
-	"action": {
-		"default_popup": "pages/index.html",
-		"default_icon": {
-			"16": "/images/icon16.png",
-			"32": "/images/icon32.png",
-			"48": "/images/icon48.png",
-			"128": "/images/icon128.png"
-		}
-	},
-	"background": {
-		"service_worker": "background.js"
-	},
-	"content_scripts":[
-		{
-			"matches":["https://*.twitter.com/*"],
-			"run_at":"document_end",
-			"js":["content/script.js"],
-			"css": ["css/style.css"]
-		}
-	],
-	"web_accessible_resources": [
-		{
-			"resources": ["content/script.js"],
-			"matches":["https://*.twitter.com/*"]
-		}
-	]
+  "manifest_version": 3,
+  "name": "yBully",
+  "version": "1.0",
+  "description": "yBully",
+  "permissions": [
+    "storage"
+  ],
+  "icons": {
+    "16": "/images/icon16.png",
+    "32": "/images/icon32.png",
+    "48": "/images/icon48.png",
+    "128": "/images/icon128.png"
+  },
+  "action": {
+    "default_popup": "pages/index.html",
+    "default_icon": {
+      "16": "/images/icon16.png",
+      "32": "/images/icon32.png",
+      "48": "/images/icon48.png",
+      "128": "/images/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.twitter.com/*"
+      ],
+      "run_at": "document_end",
+      "js": [
+        "content/script.js"
+      ],
+      "css": [
+        "css/style.css"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "content/script.js"
+      ],
+      "matches": [
+        "https://*.twitter.com/*"
+      ]
+    }
+  ]
 }
