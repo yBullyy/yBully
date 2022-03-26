@@ -90,9 +90,15 @@ const extractText = (node) => {
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  console.log(data.text, map.get(data.text));
-  if (data.confidence > 0 && isExtensionOn) {
-    selectedAction(map.get(data.text));
+  // console.log(data.text, map.get(data.text));
+  let isBully = data.confidence > 0;
+  if(isExtensionOn){
+    chrome.runtime.sendMessage({ type: "ScanTweets" , tweet: data.text, isBully: isBully }, (resp) => {
+      console.log("ScanTweets", resp);
+    });
+    if (isBully) {
+      selectedAction(map.get(data.text));
+    }
   }
 }
 
@@ -171,4 +177,3 @@ const targetObserver = new MutationObserver((mutationsList, obs) => {
 
 
 targetObserver.observe(bodyNode, { childList: true, subtree: true });
-

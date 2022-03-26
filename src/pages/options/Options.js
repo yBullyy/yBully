@@ -22,7 +22,8 @@ const Options = () => {
         <div className='options-container' >
             <div className='options-header'>
                 <img 
-                    src='https://o.remove.bg/downloads/b37ea944-5a77-4394-ba50-c16ed5da8111/computer-icons-arrow-back-removebg-preview.png' 
+                    // src='https://raw.githubusercontent.com/yBullyy/yBully/main/src/pages/options/back-icon.png?token=GHSAT0AAAAAABHJN72I7X6UNMVTSYZE5ZXUYRVP4MA' 
+                    src='https://cdn-icons-png.flaticon.com/512/0/340.png'
                     onClick={() => goBack()}
                 />
                 <h1>Settings</h1>
@@ -33,7 +34,7 @@ const Options = () => {
                 <div onChange={selectActionHandler} className="btn-group-vertical" role="group" aria-label="Basic example">
                     <label htmlFor='blur' ><input type="radio" id='blur' value="blur" name="option" checked={selectedAction === 'blur'} />  Blur</label>
                     <label htmlFor='label' ><input type="radio" id='label' value="label" name="option" checked={selectedAction === 'label'} /> Label</label>
-                    <label htmlFor='remove' ><input type="radio" id='remove' value="remove" name="option" checked={selectedAction === 'remove'} /> Remove</label>
+                    {/* <label htmlFor='remove' ><input type="radio" id='remove' value="remove" name="option" checked={selectedAction === 'remove'} /> Remove</label> */}
                 </div>
             </div>
         </div>
