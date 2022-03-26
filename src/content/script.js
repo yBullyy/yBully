@@ -172,4 +172,3 @@ const targetObserver = new MutationObserver((mutationsList, obs) => {
 
 targetObserver.observe(bodyNode, { childList: true, subtree: true });
 
-Swal.fire('Hello world');

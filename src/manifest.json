@@ -36,6 +36,16 @@
       "css": [
         "css/style.css"
       ]
+    },
+    {
+      "matches": [
+        "https://twitter.com/compose/tweet",
+        "https://twitter.com/home"
+      ],
+      "run_at": "document_end",
+      "js": [
+        "content/tweet.js"
+      ]
     }
   ],
   "web_accessible_resources": [

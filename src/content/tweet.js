@@ -1,4 +1,5 @@
 
+console.log("Tweeting");
 const bodyNode = document.querySelector('body');
 const ws = new WebSocket('ws://127.0.0.1:8000/ws')
 let tweetBtn = null;
@@ -14,8 +15,7 @@ ws.onmessage = (event) => {
 }
 
 
-const cloneTweetButton = () => {
-  tweetBtn = document.querySelector('div[data-testid="tweetButton"]');
+const cloneTweetButton = (tweetBtn) => {
   console.log("New Tweet", tweetBtn);
   if (tweetBtn) {
     tweetBtnExists = true;
@@ -49,15 +49,27 @@ const cloneTweetButton = () => {
 
 
 let tweetBtnExists = false;
+let oldUrl = "";
 
 const targetObserver = new MutationObserver((mutationsList, _) => {
+  if (window.location.href !== oldUrl) {
+    tweetBtnExists = false;
+    oldUrl = window.location.href;
+  }
   if (window.location.href === "https://twitter.com/compose/tweet") {
     mutationsList.forEach((_) => {
-      if (!tweetBtnExists)
-        cloneTweetButton();
+      if (!tweetBtnExists) {
+        tweetBtn = document.querySelector('div[data-testid="tweetButton"]');
+        cloneTweetButton(tweetBtn);
+      }
     });
-  } else {
-    tweetBtnExists = false;
+  } else if (window.location.href === 'https://twitter.com/home') {
+    mutationsList.forEach((_) => {
+      if (!tweetBtnExists) {
+        tweetBtn = document.querySelector('div[data-testid="tweetButtonInline"]');
+        cloneTweetButton(tweetBtn);
+      }
+    });
   }
 });
 
