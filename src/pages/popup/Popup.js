@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { goTo } from '../../../node_modules/react-chrome-extension-router/dist/index';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../background';
-import { saveUserToFirestore } from '../helpers/firebase';
+import { saveUserToFirestore, updateGeneralStats } from '../helpers/firebase';
 import Home from '../home/Home';
 import Options from '../options/Options';
 
@@ -54,6 +54,7 @@ const Popup = () => {
             if (isSignup) {
                 let username = document.querySelector('#username2').value;
                 let isSuccess = await saveUserToFirestore({ email: user.email, username, uid: user.uid });
+                await updateGeneralStats(0, 0, 0, 1);
                 if (isSuccess)
                     alert('User created successfully');
                 else
