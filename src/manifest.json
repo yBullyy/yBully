@@ -40,8 +40,7 @@
     },
     {
       "matches": [
-        "https://twitter.com/compose/tweet",
-        "https://twitter.com/home"
+        "https://*.twitter.com/*"
       ],
       "run_at": "document_end",
       "js": [
