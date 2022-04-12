@@ -6,7 +6,6 @@ const bodyNode = document.querySelector('body');
 const allTweets = new Set();
 const ws = new WebSocket('ws://127.0.0.1:8000/ws')
 const map = new Map();
-const bullyMap = new Map();
 const BULLY_THRESHOLD = 0.5;
 
 
@@ -78,9 +77,10 @@ const getText = (node) => {
 const extractText = (node) => {
   try {
     const text = getText(node);
+    const { tweetId, tweetUsername } = getTweetId(node);
     console.log(node, text);
     if (text !== "") {
-      map.set(text, node);
+      map.set(text, { node, tweetId, tweetUsername });
       ws.send(text);
     }
   } catch (e) {
@@ -98,13 +98,11 @@ ws.onmessage = (event) => {
     chrome.runtime.sendMessage({ type: "ScanTweets", tweet: data.text, isBully: isBully }, (resp) => {
       console.log("ScanTweets", resp);
     });
-    const tweetId = getTweetId(map.get(data.text));
+    const tweetObj = map.get(data.text);
     if (isBully) {
-      selectedAction(map.get(data.text));
-      bullyMap.set(tweetId, { text: data.text, bully: true });
-    } else {
-      bullyMap.set(tweetId, { text: data.text, bully: false });
+      selectedAction(tweetObj.node);
     }
+    map.get(data.text)['bully'] = isBully;
   }
 }
 
@@ -121,17 +119,18 @@ const blacklistedClasses = ['Timeline: Trending now'];
 
 const getTweetId = (node) => {
   const tweetLink = node.querySelector('time').parentElement.href;
-  const tweetId = tweetLink.split('/')[3] + "_" + tweetLink.split('/')[5];
-  return tweetId;
+  const tweetUsername = tweetLink.split('/')[3];
+  const tweetId = tweetLink.split('/')[5];
+  return { tweetUsername, tweetId };
 }
 
 const onReportClick = (event) => {
   event.stopPropagation();
-  const tweetId = event.target.getAttribute('data-tweet-id');
-  const tweetText = bullyMap.get(tweetId).text;
-  const correctLabel = bullyMap.get(tweetId).bully === true ? "not_bully" : "bully";
+  const tweetText = event.target.getAttribute('data-tweet-text');
+  const { bully, tweetId, tweetUsername } = map.get(tweetText);
+  const correctLabel = bully ? "not_bully" : "bully";
   console.log(tweetId, tweetText, correctLabel);
-  chrome.runtime.sendMessage({ type: "ReportTweet", tweetId, tweetText, correctLabel }, (resp) => {
+  chrome.runtime.sendMessage({ type: "ReportTweet", tweetId, tweetText, correctLabel, tweetUsername }, (resp) => {
     event.target.style.backgroundColor = "green";
     event.target.innerText = "Reported";
   });
@@ -141,12 +140,12 @@ const addReportButton = (node) => {
   try {
     console.log("Adding report button", node);
     let topDiv = node.getElementsByTagName('article')[0].children[0].children[0].children[0].children[0].children[0];
-    const tweetId = getTweetId(node);
+    const tweetText = getText(node);
     // add div to children to topDiv at the end
     let divTag = document.createElement('div');
     divTag.innerText = `Report`;
     divTag.className = 's-label hide';
-    divTag.setAttribute('data-tweet-id', tweetId);
+    divTag.setAttribute('data-tweet-text', tweetText);
     divTag.addEventListener('click', onReportClick);
     topDiv.appendChild(divTag);
     node.classList.add("tweet");

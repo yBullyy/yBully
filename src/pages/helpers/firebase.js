@@ -34,8 +34,7 @@ export const updateUserStats = async (
   totalScannedTweets = 0,
   totalBullyTweets = 0,
   totalReportedTweets = 0,
-  totalApprovedTweets = 0,
-  trustScore = 0) => {
+  totalApprovedTweets = 0,) => {
   try {
     const user = await getDoc(doc(db, 'users', userId));
     const previousTotalScannedTweets = user.data().totalScannedTweets;
@@ -48,7 +47,7 @@ export const updateUserStats = async (
     const newTotalBullyTweets = previousTotalBullyTweets + totalBullyTweets;
     const newTotalReportedTweets = previousTotalReportedTweets + totalReportedTweets;
     const newTotalApprovedTweets = previousTotalApprovedTweets + totalApprovedTweets;
-    const newTrustScore = previousTrustScore + trustScore;
+    const newTrustScore = newTotalApprovedTweets / newTotalReportedTweets;
 
     const userData = {
       totalScannedTweets: newTotalScannedTweets,
@@ -91,7 +90,7 @@ export const updateDailyScannedTweets = async (date, bullyCount, noBullyCount) =
 export const updateDailyReports = async (date, reportCount) => {
   try {
     const docRef = doc(db, 'dailyReports', date);
-    const docSnapshot = getDoc(docRef);
+    const docSnapshot = await getDoc(docRef);
     if (docSnapshot.exists()) {
       const data = docSnapshot.data();
       const newReportCount = data.reportCount + reportCount;
@@ -107,7 +106,7 @@ export const updateDailyReports = async (date, reportCount) => {
 }
 
 
-export const addReportedTweet = async (tweetId, userId, text, correctLabel) => {
+export const addReportedTweet = async (tweetId, userId, text, correctLabel, tweetUsername) => {
   console.log(tweetId, userId, text, correctLabel);
   const docRef = doc(db, 'reportedTweets', tweetId);
   // Check if doc exists and userId exists in reportedBy array
@@ -117,7 +116,7 @@ export const addReportedTweet = async (tweetId, userId, text, correctLabel) => {
     const data = docSnapshot.data();
     // Check if userId already exists in reportedBy array if present then return
     if (data.reportedBy.includes(userId)) {
-      return true;
+      return false;
     } else {
       const newReportCount = data.reportCount + 1;
       const newReportedBy = data.reportedBy.concat(userId);
@@ -131,6 +130,7 @@ export const addReportedTweet = async (tweetId, userId, text, correctLabel) => {
       correctLabel,
       reportCount: 1,
       reportedBy: [userId],
+      tweetUrl: `https://twitter.com/${tweetUsername}/status/${tweetId}`,
     }
     try {
       await setDoc(doc(db, 'reportedTweets', tweetId), tweetData);

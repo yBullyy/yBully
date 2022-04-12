@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import * as env from './env';
-import { saveUserToFirestore, updateDailyScannedTweets, updateGeneralStats, updateUserStats, addReportedTweet } from './pages/helpers/firebase';
+import { saveUserToFirestore, updateDailyScannedTweets, updateGeneralStats, updateUserStats, addReportedTweet, updateDailyReports } from './pages/helpers/firebase';
 
 const firebaseConfig = {
   apiKey: env.FIREBASE_API_KEY,
@@ -20,6 +20,7 @@ export const db = getFirestore(app);
 
 let bully = new Set();
 let noBully = new Set();
+let reportedCount = 0;
 let twitterTabIds = [];
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -52,9 +53,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case 'ReportTweet':
       console.log('addReportedTweet');
       chrome.storage.local.get(['user']).then(({ user }) => {
-        return addReportedTweet(request.tweetId, user.uid, request.tweetText, request.correctLabel);
+        return addReportedTweet(request.tweetId, user.uid, request.tweetText, request.correctLabel, request.tweetUsername);
       })
-        .then(() => {
+        .then((res) => {
+          console.log("addReportedTweet", res);
+          if (res)
+            reportedCount++;
           sendResponse({ success: true });
         })
         .catch((err) => {
@@ -96,10 +100,13 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
       noBully.clear();
 
       console.log('updating stats...');
-      await updateUserStats(currUserId, totalScannedTweets, bullyCount, 0, 0, 0);
+      //
+      await updateUserStats(currUserId, totalScannedTweets, bullyCount, reportedCount, 0);
       await updateDailyScannedTweets(dateString, bullyCount, noBullyCount);
-      await updateGeneralStats(bullyCount, noBullyCount, 0, 0);
+      await updateGeneralStats(bullyCount, noBullyCount, reportedCount, 0);
+      await updateDailyReports(dateString, reportedCount);
       console.log('updated stats');
+      reportedCount = 0;
     }
   }
 
