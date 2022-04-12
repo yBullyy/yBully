@@ -42,3 +42,10 @@
   text-align: center;
   margin-top: 10px;
 }
+
+.hide{
+  display:none;
+}
+.tweet:hover .hide{
+  display: block;
+}

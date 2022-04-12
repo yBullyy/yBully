@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import * as env from './env';
-import { saveUserToFirestore, updateDailyScannedTweets, updateGeneralStats, updateUserStats } from './pages/helpers/firebase';
+import { saveUserToFirestore, updateDailyScannedTweets, updateGeneralStats, updateUserStats, addReportedTweet } from './pages/helpers/firebase';
 
 const firebaseConfig = {
   apiKey: env.FIREBASE_API_KEY,
@@ -23,6 +23,7 @@ let noBully = new Set();
 let twitterTabIds = [];
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log("Recieved message", request);
   switch (request.type) {
     case 'saveUserToFirestore':
       console.log('saveUserToFirestore');
@@ -48,6 +49,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
       sendResponse({ success: true });
       break;
+    case 'ReportTweet':
+      console.log('addReportedTweet');
+      chrome.storage.local.get(['user']).then(({ user }) => {
+        return addReportedTweet(request.tweetId, user.uid, request.tweetText, request.correctLabel);
+      })
+        .then(() => {
+          sendResponse({ success: true });
+        })
+        .catch((err) => {
+          console.log(err);
+          sendResponse({ success: false });
+        });
+      sendResponse(true);
+      break;
     default:
       break;
   }
@@ -69,17 +84,17 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
     let { user } = await chrome.storage.local.get(['user']);
     let currUserId = user.uid;
     console.log(currUserId);
-    
+
     let date = new Date();
     let dateString = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
 
     console.log('bullyCount', bullyCount);
     console.log('noBullyCount', noBullyCount);
 
-    if(bullyCount > 0 || noBullyCount > 0){
+    if (bullyCount > 0 || noBullyCount > 0) {
       bully.clear();
       noBully.clear();
-      
+
       console.log('updating stats...');
       await updateUserStats(currUserId, totalScannedTweets, bullyCount, 0, 0, 0);
       await updateDailyScannedTweets(dateString, bullyCount, noBullyCount);

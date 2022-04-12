@@ -1,12 +1,12 @@
 const config = { childList: true };
 
 
-
 let isExtensionOn = true;
 const bodyNode = document.querySelector('body');
 const allTweets = new Set();
 const ws = new WebSocket('ws://127.0.0.1:8000/ws')
 const map = new Map();
+const bullyMap = new Map();
 const BULLY_THRESHOLD = 0.5;
 
 
@@ -64,8 +64,9 @@ chrome.storage.sync.get(['action'], function(result) {
 
 
 const getText = (node) => {
-  const spanParentNode = node.getElementsByTagName('article')[0]?.children[0]?.children[0]?.children[0]?.children[1]?.children[1]?.children[1];
-  const spanTags = spanParentNode.children[spanParentNode.children.length === 3 ? 0 : 1]?.getElementsByTagName('span') || [];
+  // const spanParentNode = node.getElementsByTagName('article')[0]?.children[0]?.children[0]?.children[0]?.children[1]?.children[1]?.children[1];
+  const spanParentNode = node.getElementsByTagName('article')[0].querySelector('div[lang]');
+  const spanTags = spanParentNode.getElementsByTagName('span') || [];
   let text = "";
   for (let i = 0; i < spanTags.length; i++) {
     text += spanTags[i].innerText;
@@ -77,7 +78,7 @@ const getText = (node) => {
 const extractText = (node) => {
   try {
     const text = getText(node);
-    // console.log(node, text);
+    console.log(node, text);
     if (text !== "") {
       map.set(text, node);
       ws.send(text);
@@ -93,12 +94,16 @@ ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
   // console.log(data.text, map.get(data.text));
   let isBully = data.confidence > BULLY_THRESHOLD;
-  if(isExtensionOn){
-    chrome.runtime.sendMessage({ type: "ScanTweets" , tweet: data.text, isBully: isBully }, (resp) => {
+  if (isExtensionOn) {
+    chrome.runtime.sendMessage({ type: "ScanTweets", tweet: data.text, isBully: isBully }, (resp) => {
       console.log("ScanTweets", resp);
     });
+    const tweetId = getTweetId(map.get(data.text));
     if (isBully) {
       selectedAction(map.get(data.text));
+      bullyMap.set(tweetId, { text: data.text, bully: true });
+    } else {
+      bullyMap.set(tweetId, { text: data.text, bully: false });
     }
   }
 }
@@ -114,6 +119,45 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 const blacklistedClasses = ['Timeline: Trending now'];
 
 
+const getTweetId = (node) => {
+  const tweetLink = node.querySelector('time').parentElement.href;
+  const tweetId = tweetLink.split('/')[3] + "_" + tweetLink.split('/')[5];
+  return tweetId;
+}
+
+const onReportClick = (event) => {
+  event.stopPropagation();
+  const tweetId = event.target.getAttribute('data-tweet-id');
+  const tweetText = bullyMap.get(tweetId).text;
+  const correctLabel = bullyMap.get(tweetId).bully === true ? "not_bully" : "bully";
+  console.log(tweetId, tweetText, correctLabel);
+  chrome.runtime.sendMessage({ type: "ReportTweet", tweetId, tweetText, correctLabel }, (resp) => {
+    event.target.style.backgroundColor = "green";
+    event.target.innerText = "Reported";
+  });
+}
+
+const addReportButton = (node) => {
+  try {
+    console.log("Adding report button", node);
+    let topDiv = node.getElementsByTagName('article')[0].children[0].children[0].children[0].children[0].children[0];
+    const tweetId = getTweetId(node);
+    // add div to children to topDiv at the end
+    let divTag = document.createElement('div');
+    divTag.innerText = `Report`;
+    divTag.className = 's-label hide';
+    divTag.setAttribute('data-tweet-id', tweetId);
+    divTag.addEventListener('click', onReportClick);
+    topDiv.appendChild(divTag);
+    node.classList.add("tweet");
+
+  } catch (e) {
+    console.log("Failed to add report button", node);
+    console.log(e);
+  }
+}
+
+
 const extractTweets = (obs) => {
   const baseNode = document.querySelectorAll('.css-1dbjc4n[aria-label^="Timeline"][aria-label]');
   const ariaLabelText = baseNode[0]?.getAttribute('aria-label');
@@ -125,6 +169,7 @@ const extractTweets = (obs) => {
       found = true;
     const childrenNodes = targetNode.children;
     for (let i = 0; i < childrenNodes.length; i++) {
+      addReportButton(childrenNodes[i]);
       extractText(childrenNodes[i]);
     }
     const callback = function(mutationsList, observer) {
@@ -137,6 +182,7 @@ const extractTweets = (obs) => {
           // }
           for (let i = 0; i < mutation.addedNodes.length; i++) {
             extractText(mutation.addedNodes[i]);
+            addReportButton(mutation.addedNodes[i]);
             if (!allTweets.has(mutation.addedNodes[i])) {
               allTweets.add(mutation.addedNodes[i]);
             }
@@ -178,3 +224,4 @@ const targetObserver = new MutationObserver((mutationsList, obs) => {
 
 
 targetObserver.observe(bodyNode, { childList: true, subtree: true });
+
