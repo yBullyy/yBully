@@ -144,7 +144,7 @@ const addReportButton = (node) => {
     // add div to children to topDiv at the end
     let divTag = document.createElement('div');
     divTag.innerText = `Report`;
-    divTag.className = 's-label hide';
+    divTag.className = 's-label-report hide';
     divTag.setAttribute('data-tweet-text', tweetText);
     divTag.addEventListener('click', onReportClick);
     topDiv.appendChild(divTag);
