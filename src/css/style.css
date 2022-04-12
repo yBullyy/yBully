@@ -43,6 +43,18 @@
   margin-top: 10px;
 }
 
+
+.s-label-report{
+  padding: 6px;
+  color: #fff;
+  background-color: blue;
+  border-radius: 6px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
 .hide{
   display:none;
 }
