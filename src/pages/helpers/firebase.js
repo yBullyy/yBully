@@ -78,7 +78,7 @@ export const updateDailyScannedTweets = async (date, bullyCount, noBullyCount) =
       const newNoBullyCount = data.noBullyCount + noBullyCount;
       await updateDoc(docRef, { bullyCount: newBullyCount, noBullyCount: newNoBullyCount });
     } else {
-      await setDoc(docRef, { bullyCount, noBullyCount, date });
+      await setDoc(docRef, { bullyCount, noBullyCount, date, timestamp: new Date() });
     }
     return true;
   } catch (error) {
@@ -96,7 +96,7 @@ export const updateDailyReports = async (date, reportCount) => {
       const newReportCount = data.reportCount + reportCount;
       await updateDoc(docRef, { reportCount: newReportCount });
     } else {
-      await setDoc(docRef, { reportCount, date });
+      await setDoc(docRef, { reportCount, date, timestamp: new Date() });
     }
     return true;
   } catch (error) {
