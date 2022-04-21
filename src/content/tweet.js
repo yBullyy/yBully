@@ -16,7 +16,6 @@ ws.onmessage = (event) => {
 
 
 const cloneTweetButton = (tweetBtn) => {
-  console.log("New Tweet", tweetBtn);
   if (tweetBtn) {
     tweetBtnExists = true;
     const clonedBtn = tweetBtn.cloneNode(true);

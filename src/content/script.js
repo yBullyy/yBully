@@ -1,7 +1,6 @@
 const config = { childList: true };
 
 
-let isExtensionOn = true;
 const bodyNode = document.querySelector('body');
 const allTweets = new Set();
 const ws = new WebSocket('ws://127.0.0.1:8000/ws')
@@ -11,10 +10,6 @@ const BULLY_THRESHOLD = 0.5;
 
 
 
-// Get current setting of user
-chrome.storage.local.get(['isOn'], (key) => {
-  isExtensionOn = key.isOn;
-});
 
 const revealTweet = (e) => {
   e.target.classList.add("hidden"); // remove the button
@@ -94,16 +89,15 @@ ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
   // console.log(data.text, map.get(data.text));
   let isBully = data.confidence > BULLY_THRESHOLD;
-  if (isExtensionOn) {
-    chrome.runtime.sendMessage({ type: "ScanTweets", tweet: data.text, isBully: isBully }, (resp) => {
-      console.log("ScanTweets", resp);
-    });
-    const tweetObj = map.get(data.text);
-    if (isBully) {
-      selectedAction(tweetObj.node);
-    }
-    map.get(data.text)['bully'] = isBully;
+  chrome.runtime.sendMessage({ type: "ScanTweets", tweet: data.text, isBully: isBully }, (resp) => {
+    console.log("ScanTweets", resp);
+  });
+  const tweetObj = map.get(data.text);
+  addReportButton(tweetObj.node);
+  if (isBully) {
+    selectedAction(tweetObj.node);
   }
+  map.get(data.text)['bully'] = isBully;
 }
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
@@ -166,9 +160,13 @@ const extractTweets = (obs) => {
     const targetNode = baseNode[0].children[0];
     if (targetNode.children[0].getAttribute('role') !== 'progressbar')
       found = true;
+    if (targetNode.getAttribute('data-mutated') === 'true') {
+      return;
+    } else {
+      targetNode.setAttribute('data-mutated', 'true');
+    }
     const childrenNodes = targetNode.children;
     for (let i = 0; i < childrenNodes.length; i++) {
-      addReportButton(childrenNodes[i]);
       extractText(childrenNodes[i]);
     }
     const callback = function(mutationsList, observer) {
@@ -181,7 +179,6 @@ const extractTweets = (obs) => {
           // }
           for (let i = 0; i < mutation.addedNodes.length; i++) {
             extractText(mutation.addedNodes[i]);
-            addReportButton(mutation.addedNodes[i]);
             if (!allTweets.has(mutation.addedNodes[i])) {
               allTweets.add(mutation.addedNodes[i]);
             }

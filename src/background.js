@@ -67,12 +67,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
       sendResponse(true);
       break;
+    case 'reloadTabs':
+      sendResponse(true);
+      const asyncTasks = [];
+      for (let tabId in twitterTabIds) {
+        asyncTasks.push(chrome.tabs.reload(tabId));
+      }
+      Promise.all(asyncTasks).then(() => {
+        console.log("reloaded all tabs");
+      });
+      break;
     default:
       break;
   }
 });
 
-chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+const updateCount = (async (tabId, removeInfo) => {
   console.log('tabId', tabId);
   console.log(twitterTabIds);
 
@@ -110,6 +120,40 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
     }
   }
 
+});
+
+const injectScript = async (tabId) => {
+  const { isOn } = await chrome.storage.local.get(['isOn']);
+  if (isOn) {
+    chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      files: ['css/style.css', 'content/script.js', 'content/tweet.js']
+    });
+  }
+}
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
+
+  if (changeInfo.url !== undefined) {
+    // If url of tab is changed and it contains twitter then injectscript and push tabId to twitterTabIds
+    if (changeInfo.url.includes('twitter.com')) {
+      if (!twitterTabIds.includes(tabId)) {
+        twitterTabIds.push(tabId);
+        await injectScript(tabId);
+      }
+    } else if (twitterTabIds.includes(tabId)) { // Else if tabId is in twitterTabIds then remove it
+      await updateCount(tabId);
+    }
+  } else if ((changeInfo.status && changeInfo.status == "complete") && twitterTabIds.includes(tabId)) { // If page is reloaded and tabId is in twitterTabIds then also inject script to the tab
+    await injectScript(tabId);
+  }
+});
+
+
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  if (twitterTabIds.includes(tabId)) {
+    await updateCount(tabId);
+  };
 });
 
 console.log('background script here...')
