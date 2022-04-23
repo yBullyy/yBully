@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDocument } from 'react-firebase-hooks/firestore';
 import { doc } from 'firebase/firestore';
-import ReactLoading from 'react-loading';
 
 import { goTo } from '../../../node_modules/react-chrome-extension-router/dist/index';
 import { auth, db } from '../../background';
@@ -11,7 +10,7 @@ import StatBox from './StatBox'
 
 const Home = (props) => {
   const [isChecked, setChecked] = useState(true);
-  const [value, loading] = useDocument(doc(db, 'users', props.user.uid), { snapshotListenOptions: { includeMetadataChanges: true } });
+  const [value] = useDocument(doc(db, 'users', props.user.uid), { snapshotListenOptions: { includeMetadataChanges: true } });
 
   const [stats, setStats] = useState({});
 
@@ -42,12 +41,7 @@ const Home = (props) => {
   }, []);
 
   return (
-    loading
-      ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', backgroundColor: '#fff' }} >
-        <ReactLoading type='spinningBubbles' color='#000' />
-      </div>
-      : <div className="main-container">
-        {/* <button onClick={() => goTo(Popup)}>Go to Login</button> */}
+      <div className="main-container">
         <div className="header">
           <div className="logo">
             <img src={"../images/icon48.png"} style={{ width: '30px', height: '30px' }} />
