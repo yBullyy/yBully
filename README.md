@@ -96,7 +96,7 @@ export const API_URL = '<your-websocket-url-after-running-ybully-websocket-proje
 License
 --------
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/yBullyy/yBully/blob/main/LICENSE)
+[![License: Apache License 2.0](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://github.com/yBullyy/yBully/blob/main/LICENSE)
 
 
 Stargazers
