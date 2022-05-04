@@ -73,14 +73,14 @@ Once the firebase project is ready, follow below steps.
 3. Add the following lines to `env.js` file.
 
 ```js
-export const FIREBASE_API_KEY = <your-firebase-api-key>;
-export const FIREBASE_AUTH_DOMAIN = <your-firebase-auth-domain>;
-export const FIREBASE_DATABASE_URL = <your-firebase-database-url>;
-export const FIREBASE_PROJECT_ID = <your-firebase-project-id>;
-export const FIREBASE_STORAGE_BUCKET = <your-firebase-storage-bucket>;
-export const FIREBASE_MESSAGING_SENDER_ID = <your-firebase-messaging-sender-id>;
-export const FIREBASE_APP_ID = <your-firebase-app-id>;
-export const API_URL = <your-websocket-url-after-running-ybully-websocket-project>; // for eg: "ws://localhost:8000"
+export const FIREBASE_API_KEY = '<your-firebase-api-key>';
+export const FIREBASE_AUTH_DOMAIN = '<your-firebase-auth-domain>';
+export const FIREBASE_DATABASE_URL = '<your-firebase-database-url>';
+export const FIREBASE_PROJECT_ID = '<your-firebase-project-id>';
+export const FIREBASE_STORAGE_BUCKET = '<your-firebase-storage-bucket>';
+export const FIREBASE_MESSAGING_SENDER_ID = '<your-firebase-messaging-sender-id>';
+export const FIREBASE_APP_ID = '<your-firebase-app-id>';
+export const API_URL = '<your-websocket-url-after-running-ybully-websocket-project>'; // for eg: "ws://localhost:8000"
 
 ```
 
