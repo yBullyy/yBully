@@ -59,8 +59,8 @@ const Home = (props) => {
             <span className="check-handler"></span>
           </label>
         </div>
-        <div className="p-4 text-black" style={{ background: 'white', borderRadius: '5px' }}>
-          <div className="text-center">Welcome, {stats.name}</div>
+        <div className="text-black" style={{ background: 'white', borderRadius: '5px', padding: '1.5rem' }}>
+          <div style={{ textAlign: 'center', color: 'black', fontWeight: 'initial' }} >Welcome, {stats.name}</div>
           <hr />
           <div className="flex flex-column mt-4 gap-4" style={{ gap: '20px' }}>
             {/* <div>Scanned Tweets:<span className="text-green-500" style={{ color: 'green' }}> 100</span> </div> */}

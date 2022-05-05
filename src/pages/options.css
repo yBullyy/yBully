@@ -29,6 +29,7 @@ body{
 
 .options-header{
     display: flex;
+    align-items: center;
 }
 
 .options-header img{

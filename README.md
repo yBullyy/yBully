@@ -66,7 +66,9 @@ Installation
 
 Before starting with installation you would require to setup a [firebase project](https://firebase.google.com/).
 
-Once the firebase project is ready, follow below steps.
+Also you need yBully's websocket running. For this clone this [project](https://github.com/yBullyy/yBully-websocket.git) and run it.
+
+Once above thing are done, follow below steps.
 
 1. Clone this repository `git clone https://github.com/yBullyy/yBully.git`.
 2. Create env.js file inside `ybully/src/` directory.
