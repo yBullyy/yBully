@@ -1,10 +1,9 @@
 
 console.log("Tweeting");
-const bodyNode = document.querySelector('body');
-const ws = new WebSocket('ws://127.0.0.1:8000/ws')
+const tweetWS = new WebSocket('ws://127.0.0.1:8000/ws')
 let tweetBtn = null;
 
-ws.onmessage = (event) => {
+tweetWS.onmessage = (event) => {
   const data = JSON.parse(event.data);
   console.log("On New Tweet Message", data);
   if (data.confidence < 0.5) {
@@ -17,6 +16,8 @@ ws.onmessage = (event) => {
 
 const cloneTweetButton = (tweetBtn) => {
   if (tweetBtn) {
+    if (tweetBtn.getAttribute('data-mutated') === 'true') return;
+    tweetBtn.setAttribute('data-mutated', 'true');
     tweetBtnExists = true;
     const clonedBtn = tweetBtn.cloneNode(true);
     const oberveTweetBtn = new MutationObserver((mutationsList, _) => {
@@ -40,7 +41,7 @@ const cloneTweetButton = (tweetBtn) => {
 
       }
       // console.log(text);
-      ws.send(text);
+      tweetWS.send(text);
     })
     oberveTweetBtn.observe(tweetBtn, { attributes: true });
   }
@@ -50,7 +51,7 @@ const cloneTweetButton = (tweetBtn) => {
 let tweetBtnExists = false;
 let oldUrl = "";
 
-const targetObserver = new MutationObserver((mutationsList, _) => {
+const tweetObserver = new MutationObserver((mutationsList, _) => {
   if (window.location.href !== oldUrl) {
     tweetBtnExists = false;
     oldUrl = window.location.href;
@@ -73,5 +74,5 @@ const targetObserver = new MutationObserver((mutationsList, _) => {
 });
 
 
-targetObserver.observe(bodyNode, { childList: true, subtree: true });
+tweetObserver.observe(bodyNode, { childList: true, subtree: true });
 

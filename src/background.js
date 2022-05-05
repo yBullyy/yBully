@@ -127,7 +127,8 @@ const injectScript = async (tabId) => {
   if (isOn) {
     chrome.scripting.executeScript({
       target: { tabId: tabId },
-      files: ['css/style.css', 'content/script.js', 'content/tweet.js']
+      files: ['css/style.css', 'content/script.js', 'content/tweet.js'],
+      world: 'ISOLATED'
     });
   }
 }
