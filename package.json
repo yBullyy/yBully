@@ -1,8 +1,8 @@
 {
-  "name": "@rustyzone/rollup-firease-template",
+  "name": "yBully Chrome Extension",
   "version": "1.0.0",
   "private": true,
-  "description": "Chrome extension boilerplate with JavaScript, React & Firebase",
+  "description": "",
   "scripts": {
     "dev": "rollup -c -w",
     "build": "rollup -c",
@@ -21,7 +21,6 @@
     "react-chrome-extension-router": "^1.3.1",
     "react-dom": "^17.0.2",
     "react-firebase-hooks": "^5.0.3",
-    "react-loading": "^2.0.3",
     "webextension-polyfill": "^0.8.0"
   },
   "devDependencies": {
