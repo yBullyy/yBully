@@ -82,44 +82,40 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-const updateCount = (async (tabId, removeInfo) => {
-  console.log('tabId', tabId);
-  console.log(twitterTabIds);
+const updateCount = (async (tabId) => {
+  try {
+    if (twitterTabIds.includes(tabId)) {
+      twitterTabIds = twitterTabIds.filter(id => id !== tabId);
+      console.log(twitterTabIds);
 
-  if (twitterTabIds.includes(tabId)) {
-    console.log('twitter tab is closed');
-    twitterTabIds = twitterTabIds.filter(id => id !== tabId);
-    console.log(twitterTabIds);
+      let bullyCount = bully.size;
+      let noBullyCount = noBully.size;
+      let totalScannedTweets = bullyCount + noBullyCount;
 
-    let bullyCount = bully.size;
-    let noBullyCount = noBully.size;
-    let totalScannedTweets = bullyCount + noBullyCount;
+      let { user } = await chrome.storage.local.get(['user']);
+      let currUserId = user.uid;
+      console.log(currUserId);
 
-    let { user } = await chrome.storage.local.get(['user']);
-    let currUserId = user.uid;
-    console.log(currUserId);
+      let date = new Date();
+      let dateString = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
 
-    let date = new Date();
-    let dateString = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+      if (bullyCount > 0 || noBullyCount > 0) {
+        bully.clear();
+        noBully.clear();
 
-    console.log('bullyCount', bullyCount);
-    console.log('noBullyCount', noBullyCount);
-
-    if (bullyCount > 0 || noBullyCount > 0) {
-      bully.clear();
-      noBully.clear();
-
-      console.log('updating stats...');
-      //
-      await updateUserStats(currUserId, totalScannedTweets, bullyCount, reportedCount, 0);
-      await updateDailyScannedTweets(dateString, bullyCount, noBullyCount);
-      await updateGeneralStats(bullyCount, noBullyCount, reportedCount, 0);
-      await updateDailyReports(dateString, reportedCount);
-      console.log('updated stats');
-      reportedCount = 0;
+        console.log('updating stats...');
+        await updateUserStats(currUserId, totalScannedTweets, bullyCount, reportedCount, 0);
+        await updateDailyScannedTweets(dateString, bullyCount, noBullyCount);
+        await updateGeneralStats(bullyCount, noBullyCount, reportedCount, 0);
+        await updateDailyReports(dateString, reportedCount);
+        console.log('updated stats');
+        reportedCount = 0;
+      }
     }
+  } catch (error) {
+    console.log('error in updateCount');
+    console.error(error);
   }
-
 });
 
 const injectScript = async (tabId) => {
