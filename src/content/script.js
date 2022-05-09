@@ -8,9 +8,6 @@ const map = new Map();
 const BULLY_THRESHOLD = 0.5;
 
 
-
-
-
 const revealTweet = (e) => {
   e.target.classList.add("hidden"); // remove the button
   e.target.previousSibling.classList.remove("blur"); // remove blur effect
@@ -58,7 +55,6 @@ chrome.storage.sync.get(['action'], function(result) {
 
 
 const getText = (node) => {
-  // const spanParentNode = node.getElementsByTagName('article')[0]?.children[0]?.children[0]?.children[0]?.children[1]?.children[1]?.children[1];
   const spanParentNode = node.getElementsByTagName('article')[0].querySelector('div[lang]');
   const spanTags = spanParentNode.getElementsByTagName('span') || [];
   let text = "";
@@ -87,7 +83,6 @@ const extractText = (node) => {
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  // console.log(data.text, map.get(data.text));
   let isBully = data.confidence > BULLY_THRESHOLD;
   chrome.runtime.sendMessage({ type: "ScanTweets", tweet: data.text, isBully: isBully }, (resp) => {
     console.log("ScanTweets", resp);
@@ -172,11 +167,6 @@ const extractTweets = (obs) => {
     const callback = function(mutationsList, observer) {
       for (const mutation of mutationsList) {
         if (mutation.type === 'childList') {
-          // Fix sending requests to api
-          // for (let i = 0; i < mutation.removedNodes.length; i++) {
-          //   const text = getText(mutation.removedNodes[i]);
-          //   map.delete(text);
-          // }
           for (let i = 0; i < mutation.addedNodes.length; i++) {
             extractText(mutation.addedNodes[i]);
             if (!allTweets.has(mutation.addedNodes[i])) {
@@ -188,12 +178,7 @@ const extractTweets = (obs) => {
     };
 
     const observer = new MutationObserver(callback);
-
-    // Start observing the target node for configured mutations
     observer.observe(targetNode, config);
-    // setTimeout(()=> {
-    // },1000)
-    // obs.disconnect();
   };
 };
 
@@ -215,7 +200,6 @@ const targetObserver = new MutationObserver((mutationsList, obs) => {
       }, 1000);
     }
   })
-  // extractTweets(obs);
 });
 
 
