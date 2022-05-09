@@ -107,38 +107,44 @@ export const updateDailyReports = async (date, reportCount) => {
 
 
 export const addReportedTweet = async (tweetId, userId, text, correctLabel, tweetUsername) => {
-  console.log(tweetId, userId, text, correctLabel);
-  const docRef = doc(db, 'reportedTweets', tweetId);
-  // Check if doc exists and userId exists in reportedBy array
-  const docSnapshot = await getDoc(docRef);
-  if (docSnapshot.exists()) {
-    // If doc exists, increment reportCount by 1 and add userId to reportedBy array
-    const data = docSnapshot.data();
-    // Check if userId already exists in reportedBy array if present then return
-    if (data.reportedBy.includes(userId)) {
-      return false;
+  try {
+    const user = await getDoc(doc(db, 'users', userId));
+    const userData = user.data();
+    let docRef;
+    if (userData && userData.role === "trustedUser") {
+      docRef = doc(db, "approvedTweets", tweetId);
     } else {
-      const newReportCount = data.reportCount + 1;
-      const newReportedBy = data.reportedBy.concat(userId);
-      await updateDoc(docRef, { reportCount: newReportCount, reportedBy: newReportedBy });
+      docRef = doc(db, "reportedTweets", tweetId);
     }
-
-  } else {
-    const tweetData = {
-      tweetId,
-      tweetText: text,
-      correctLabel,
-      reportCount: 1,
-      reportedBy: [userId],
-      tweetUrl: `https://twitter.com/${tweetUsername}/status/${tweetId}`,
-    }
-    try {
-      await setDoc(doc(db, 'reportedTweets', tweetId), tweetData);
+    // Check if doc exists and userId exists in reportedBy array
+    const docSnapshot = await getDoc(docRef);
+    if (docSnapshot.exists()) {
+      // If doc exists, increment reportCount by 1 and add userId to reportedBy array
+      const data = docSnapshot.data();
+      // Check if userId already exists in reportedBy array if present then return
+      if (data.reportedBy.includes(userId)) {
+        return false;
+      } else {
+        const newReportCount = data.reportCount + 1;
+        const newReportedBy = data.reportedBy.concat(userId);
+        await updateDoc(docRef, { reportCount: newReportCount, reportedBy: newReportedBy });
+        return true;
+      }
+    } else {
+      const tweetData = {
+        tweetId,
+        tweetText: text,
+        correctLabel,
+        reportCount: 1,
+        reportedBy: [userId],
+        tweetUrl: `https://twitter.com/${tweetUsername}/status/${tweetId}`,
+      }
+      await setDoc(docRef, tweetData);
       return true;
-    } catch (error) {
-      console.log(error);
-      return false;
     }
+  } catch (error) {
+    console.error(error);
+    return false;
   }
 
 }
